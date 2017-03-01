@@ -1,5 +1,5 @@
 # wechat
-Just two line codes awaken your wechat bot.
+Awaken your wechat bot.
 
 ##INSTALLATION
 ```go
