@@ -297,8 +297,8 @@ func (c *cache) ggidsByNickName(nn string) ([]string, error) {
 	return nil, errors.New(`Not Found`)
 }
 
-func (c *cache) contactByUserName(nn string) (*Contact, error) {
-	if ggid, found := c.userGG[nn]; found {
+func (c *cache) contactByUserName(un string) (*Contact, error) {
+	if ggid, found := c.userGG[un]; found {
 		return c.contactByGGID(ggid)
 	}
 	return nil, errors.New(`Not Found`)

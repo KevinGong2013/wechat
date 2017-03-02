@@ -335,6 +335,15 @@ func (wechat *WeChat) AllContacts() []*Contact {
 	return vs
 }
 
+// MembersOfGroup ..返回群中所有的成员
+func (wechat *WeChat) MembersOfGroup(groupUserName string) ([]*Contact, error) {
+	group, err := wechat.cache.contactByUserName(groupUserName)
+	if err != nil {
+		return nil, err
+	}
+	return group.MemberList, nil
+}
+
 // TODO
 func (wechat *WeChat) modifyRemarkName(un string) (string, error) {
 
