@@ -330,7 +330,7 @@ func (wechat *WeChat) emitNewMessageEvent(m map[string]interface{}) {
 		mediaURL = fmt.Sprintf(`%v/%s?msgid=%v&%v`, wechat.BaseURL, path, mid, wechat.SkeyKV())
 	}
 	isAtMe := false
-	if isGroupMsg {
+	if isGroupMsg && !isSendedByMySelf {
 		atme := `@`
 		if len(wechat.MySelf.DisplayName) > 0 {
 			atme += wechat.MySelf.DisplayName
