@@ -87,31 +87,6 @@ func (c *cache) updateContact(contact *Contact) {
 	c.userGG[contact.UserName] = contact.GGID
 }
 
-func (c *cache) clearCacheByGGID(ggid string) {
-	if contact, found := c.ggmap[ggid]; found {
-		delete(c.ggmap, ggid)
-		delete(c.userGG, contact.UserName)
-
-		ggids := c.nickGG[contact.NickName]
-		idx := -1
-		for i, g := range ggids {
-			if ggid == g {
-				idx = i
-				break
-			}
-		}
-		if idx != -1 {
-			ggids = append(ggids[:idx], ggids[idx+1:]...)
-			if len(ggids) == 0 {
-				delete(c.nickGG, contact.NickName)
-			} else {
-				c.nickGG[contact.NickName] = ggids
-			}
-		}
-
-	}
-}
-
 func (wechat *WeChat) syncContacts(cts []map[string]interface{}) {
 	wechat.cache.Lock()
 	defer wechat.cache.Unlock()
@@ -273,7 +248,6 @@ func (wechat *WeChat) syncContacts(cts []map[string]interface{}) {
 	c.writeToFile()
 }
 
-// 修改在这里处理
 func (wechat *WeChat) appendContacts(cts []map[string]interface{}) {
 
 	wechat.cache.Lock()
@@ -289,15 +263,12 @@ func (wechat *WeChat) appendContacts(cts []map[string]interface{}) {
 			nc.GGID = oc.GGID
 			nc.HeadHash = oc.HeadHash
 			c.updateContact(nc)
-			logger.Infof(`update %s`, nc.NickName)
 		} else {
 			// 新建
 			nc.GGID = uuid.NewV4().String()
 			nc.HeadHash = contactHeadImgHash(wechat, nc)
 			c.updateContact(nc)
-			logger.Infof(`create new contact %s`, nc.NickName)
 		}
-		logger.Debug(nc)
 	}
 
 	for _, contact := range c.ggmap {
@@ -310,12 +281,6 @@ func (wechat *WeChat) appendContacts(cts []map[string]interface{}) {
 	}
 
 	wechat.cache.writeToFile()
-}
-
-func (wechat *WeChat) removeContact(username string) {
-	if ggid, found := wechat.cache.userGG[username]; found {
-		wechat.cache.clearCacheByGGID(ggid)
-	}
 }
 
 func (c *cache) contactByGGID(ggid string) (*Contact, error) {

@@ -81,23 +81,6 @@ func (wechat *WeChat) beginSync() error {
 					return errors.New(`sync message failed`)
 				}
 				continueFlag = resp.ContinueFlag
-
-				if resp.ModContactCount > 0 {
-					wechat.contactDidChange(resp.ModContactList, Modify)
-				}
-				if resp.DelContactCount > 0 {
-					wechat.contactDidChange(resp.DelContactList, Delete)
-				}
-				if resp.ModChatRoomMemberCount > 0 {
-					wechat.groupMemberDidChange(resp.ModChatRoomMemberList)
-				}
-				logger.Debugf(`server sync summary:
-					AddNewMessage(s)    : %d
-					ModContact(s)       : %d
-					DelContact(s)       : %d
-					ModChatRoomMember(s): %d `,
-					resp.AddMsgCount, resp.ModContactCount,
-					resp.DelContactCount, resp.ModChatRoomMemberCount)
 				go wechat.handleServerEvent(resp)
 			}
 		}

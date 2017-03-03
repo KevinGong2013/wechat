@@ -19,6 +19,13 @@ type Event struct {
 	Time int64
 }
 
+const (
+	// Delete 删除联系人
+	Delete = 0
+	// Modify 有人修改了自己的信息
+	Modify = 1
+)
+
 // EventContactData 通讯录中删人 或者有人修改资料的时候
 type EventContactData struct {
 	ChagngeType int
@@ -38,8 +45,6 @@ type EventMsgData struct {
 	FromGGID         string
 	SenderUserName   string
 	SenderGGID       string
-	ToUserName       string
-	ToGGID           string
 	OriginalMsg      map[string]interface{}
 }
 
@@ -143,9 +148,7 @@ func (wechat *WeChat) Go() {
 	es := wechat.evtStream
 
 	logger.Debug(`------------all handlers------------`)
-	for k := range es.Handlers {
-		logger.Debugf(k)
-	}
+	logger.Debug(es.Handlers)
 
 	for e := range es.stream {
 		switch e.Path {
@@ -343,7 +346,7 @@ func (wechat *WeChat) emitNewMessageEvent(m map[string]interface{}) {
 
 		contact, err := wechat.ContactByUserName(infos[0])
 		if err != nil {
-			wechat.ForceUpdateGroup(groupUserName)
+			wechat.FourceUpdateGroup(groupUserName)
 			logger.Errorf(`can't find contact info, so ignore this message %s`, m)
 			return
 		}
@@ -364,8 +367,6 @@ func (wechat *WeChat) emitNewMessageEvent(m map[string]interface{}) {
 		FromGGID:         wechat.cache.userGG[fromUserName], // TODO 不应该直接从字典里取
 		SenderUserName:   senderUserName,
 		SenderGGID:       wechat.cache.userGG[senderUserName],
-		ToUserName:       toUserName,
-		ToGGID:           wechat.cache.userGG[toUserName],
 		OriginalMsg:      m,
 	}
 	evtPath := `/solo`
@@ -388,20 +389,24 @@ func (wechat *WeChat) handleServerEvent(resp *syncMessageResponse) {
 	es := wechat.evtStream
 
 	if resp.DelContactCount > 0 {
+		logger.Debug(resp.DelContactList)
 		for _, v := range resp.DelContactList {
 			ggid := wechat.cache.userGG[v[`UserName`].(string)]
 			go es.emitContactChangeEvent(ggid, Delete)
 		}
 	}
-
 	if resp.ModContactCount > 0 {
 		for _, v := range resp.ModContactList {
+			logger.Debug(resp.ModContactList)
 			ggid := wechat.cache.userGG[v[`UserName`].(string)]
 			go es.emitContactChangeEvent(ggid, Modify)
 		}
 	}
-
+	if resp.ModChatRoomMemberCount > 0 {
+		logger.Error(`resp.ModChatRoomMemberCount TODO`)
+	}
 	if resp.AddMsgCount > 0 {
+		logger.Debug(resp.AddMsgList)
 		for _, v := range resp.AddMsgList {
 			go wechat.emitNewMessageEvent(v)
 		}

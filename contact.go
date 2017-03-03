@@ -11,13 +11,6 @@ import (
 	"time"
 )
 
-const (
-	// Delete 删除联系人
-	Delete = 0
-	// Modify 有人修改了自己的信息
-	Modify = 1
-)
-
 type updateGroupRequest struct {
 	BaseRequest
 	Count int
@@ -236,17 +229,20 @@ func (wechat *WeChat) fetchMembers(list []map[string]string) []map[string]interf
 // UpateGroupIfNeeded ...
 func (wechat *WeChat) UpateGroupIfNeeded(groupID string) {
 
-	if _, err := wechat.cache.contactByUserName(groupID); err != nil {
-		wechat.ForceUpdateGroup(groupID)
+	if _, err := wechat.cache.contactByUserName(groupID); err == nil {
+		logger.Debug(`already has group infomation`)
+		return
 	}
+
+	wechat.FourceUpdateGroup(groupID)
 }
 
-// ForceUpdateGroup upate group infomation
-func (wechat *WeChat) ForceUpdateGroup(groupUserName string) {
+// FourceUpdateGroup upate group infomation
+func (wechat *WeChat) FourceUpdateGroup(groupID string) {
 
-	logger.Debugf(`will fource update group username: %s`, groupUserName)
+	logger.Debugf(`will fource update group username: %s`, groupID)
 
-	groups, err := wechat.fetchGroups([]string{groupUserName})
+	groups, err := wechat.fetchGroups([]string{groupID})
 	if err != nil || len(groups) != 1 {
 		logger.Error(`sync group failed`)
 		return
@@ -370,10 +366,9 @@ func (wechat *WeChat) modifyRemarkName(un string) (string, error) {
 	return `Test`, nil
 }
 
-func (wechat *WeChat) contactDidChange(cts []map[string]interface{}, changeType int) {
-	logger.Info(`contact did change, will update local contact`)
-	if changeType == Modify { // 修改
-		for _, v := range cts {
+func (wechat *WeChat) contactDidChange(cts *CountedContent, changeType int) {
+	if changeType == 0 { // 修改
+		for _, v := range cts.Content {
 			vf, _ := v[`VerifyFlag`].(float64)
 			un, _ := v[`UserName`].(string)
 
@@ -381,22 +376,10 @@ func (wechat *WeChat) contactDidChange(cts []map[string]interface{}, changeType 
 				v[`Type`] = Offical
 			} else if strings.HasPrefix(un, `@@`) {
 				v[`Type`] = Group
-				wechat.ForceUpdateGroup(un)
 			} else {
 				v[`Type`] = Friend
 			}
 		}
-		wechat.appendContacts(cts)
-	} else {
-		for _, v := range cts {
-			wechat.removeContact(v[`UserName`].(string))
-		}
-	}
-}
-
-func (wechat *WeChat) groupMemberDidChange(groups []map[string]interface{}) {
-	logger.Info(`group member has changed will update local group members`)
-	for _, group := range groups {
-		wechat.ForceUpdateGroup(group[`UserName`].(string))
+		wechat.appendContacts(cts.Content)
 	}
 }
