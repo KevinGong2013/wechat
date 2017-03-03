@@ -373,20 +373,22 @@ func (wechat *WeChat) modifyRemarkName(un string) (string, error) {
 func (wechat *WeChat) contactDidChange(cts []map[string]interface{}, changeType int) {
 	logger.Info(`contact did change, will update local contact`)
 	if changeType == Modify { // 修改
+		var mcts []map[string]interface{}
 		for _, v := range cts {
 			vf, _ := v[`VerifyFlag`].(float64)
 			un, _ := v[`UserName`].(string)
 
 			if vf/8 != 0 {
 				v[`Type`] = Offical
+				mcts = append(mcts, v)
 			} else if strings.HasPrefix(un, `@@`) {
-				v[`Type`] = Group
 				wechat.ForceUpdateGroup(un)
 			} else {
 				v[`Type`] = Friend
+				mcts = append(mcts, v)
 			}
 		}
-		wechat.appendContacts(cts)
+		wechat.appendContacts(mcts)
 	} else {
 		for _, v := range cts {
 			wechat.removeContact(v[`UserName`].(string))
