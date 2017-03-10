@@ -69,21 +69,23 @@ type BaseResponse struct {
 
 // Configure ...
 type Configure struct {
-	Processor UUIDProcessor
-	Debug     bool
-	CachePath string
-	FuzzyDiff bool
-	version   string
+	Processor         UUIDProcessor
+	Debug             bool
+	CachePath         string
+	FuzzyDiff         bool
+	UniqueGroupMember bool
+	version           string
 }
 
 // DefaultConfigure create default configuration
 func DefaultConfigure() *Configure {
 	return &Configure{
-		Processor: new(defaultUUIDProcessor),
-		Debug:     true,
-		FuzzyDiff: true,
-		CachePath: `.ggbot/debug`,
-		version:   `1.0.1-rc1`,
+		Processor:         new(defaultUUIDProcessor),
+		Debug:             true,
+		FuzzyDiff:         true,
+		UniqueGroupMember: true,
+		CachePath:         `.ggbot/debug`,
+		version:           `1.0.1-rc1`,
 	}
 }
 

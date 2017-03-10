@@ -260,11 +260,13 @@ func (wechat *WeChat) syncContacts(cts []map[string]interface{}) {
 		}
 	}
 
-	for _, contact := range c.ggmap {
-		if contact.Type == Group {
-			for _, m := range contact.MemberList {
-				gid, _ := c.userGG[m.UserName] // 为所有群里的成员添加GGID
-				m.GGID = gid
+	if wechat.conf.UniqueGroupMember {
+		for _, contact := range c.ggmap {
+			if contact.Type == Group {
+				for _, m := range contact.MemberList {
+					gid, _ := c.userGG[m.UserName] // 为所有群里的成员添加GGID
+					m.GGID = gid
+				}
 			}
 		}
 	}
@@ -300,11 +302,13 @@ func (wechat *WeChat) appendContacts(cts []map[string]interface{}) {
 		logger.Debug(nc)
 	}
 
-	for _, contact := range c.ggmap {
-		if contact.Type == Group {
-			for _, m := range contact.MemberList {
-				gid, _ := c.userGG[m.UserName] // 为所有群里的成员添加GGID
-				m.GGID = gid
+	if wechat.conf.UniqueGroupMember {
+		for _, contact := range c.ggmap {
+			if contact.Type == Group {
+				for _, m := range contact.MemberList {
+					gid, _ := c.userGG[m.UserName] // 为所有群里的成员添加GGID
+					m.GGID = gid
+				}
 			}
 		}
 	}
