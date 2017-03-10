@@ -369,6 +369,10 @@ func unmarshalLocalFile(path string, obj interface{}) error {
 
 func contactHeadImgHash(wechat *WeChat, contact *Contact) string {
 
+	if wechat.conf.FuzzyDiff {
+		return `contact fuzzy diff`
+	}
+
 	data, err := wechat.GetContactHeadImg(contact)
 	if err != nil {
 		logger.Errorf(`can't get [%s]'s head image`, contact.NickName)

@@ -72,6 +72,7 @@ type Configure struct {
 	Processor UUIDProcessor
 	Debug     bool
 	CachePath string
+	FuzzyDiff bool
 	version   string
 }
 
@@ -80,8 +81,9 @@ func DefaultConfigure() *Configure {
 	return &Configure{
 		Processor: new(defaultUUIDProcessor),
 		Debug:     true,
+		FuzzyDiff: true,
 		CachePath: `.ggbot/debug`,
-		version:   `1.0.0-rc1`,
+		version:   `1.0.1-rc1`,
 	}
 }
 
