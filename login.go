@@ -330,8 +330,10 @@ func (wechat *WeChat) keepAlive() {
 		}
 		logger.Info(`sync contact successfully`)
 
+        wechat.IsLogin = true
 		wechat.loginState <- 1
 		err = wechat.beginSync()
+        wechat.IsLogin = false
 		wechat.loginState <- -1
 
 		logger.Errorf(`sync error: %v`, err)
