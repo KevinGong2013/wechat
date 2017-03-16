@@ -1,7 +1,7 @@
 # wechat
 Awaken your wechat bot.
 
-##INSTALLATION
+## INSTALLATION
 ```go
 go get github.com/KevinGong2013/ggbot/wechat
 ```
