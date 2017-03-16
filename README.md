@@ -29,7 +29,7 @@ bot.Handle(`/login`, func(arg2 wechat.Event) {
 ```
 
 ## Contact
-###Get
+### Get
 ``` go
 // all contacts
 
@@ -41,7 +41,7 @@ contact, _ := bot.ContactByUserName(UserName)
 // get contact by `NickName`
 contacts, _ := bot.ContactsByNickName(NickName)
 ```
-###Change
+### Change
 ```go
 // handle contact change event
 bot.Handle(`/contact`, func(evt wechat.Event) {
@@ -50,8 +50,8 @@ bot.Handle(`/contact`, func(evt wechat.Event) {
 })
 ```
 
-##Message
-###Send
+## Message
+### Send
 ```go
 to := `filehelper`
 // text message
@@ -66,7 +66,7 @@ bot.SendFile(`testResource/test.gif`, to)
 bot.SendFile(`testResource/test.txt`, to)
 bot.SendFile(`testResource/test.mp3`, to)
 ```
-###Receive
+### Receive
 ```go
 // all solo msg
 bot.Handle(`/msg/solo`, func(evt wechat.Event) {
@@ -81,7 +81,7 @@ bot.Handle(`/msg/group`, func(evt wechat.Event) {
 })
 ```
 
-##Convenice
+## Convenice
 ```go
 bot.AddTimer(5 * time.Second)
 bot.Handle(`/timer/5s`, func(arg2 wechat.Event) {
