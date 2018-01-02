@@ -1,19 +1,19 @@
 package wechat
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
-	"sync"
 	"fmt"
-	"bytes"
-	"github.com/aoxianglele2013/gowx/utils"
+	"github.com/emirpasic/gods/utils"
+	"sync"
 )
 
 type cache contactCache
 
 type contactCache struct {
 	sync.Mutex
-	contacts    map[string]*Contact
+	contacts map[string]*Contact
 }
 
 // Contact is wx Account struct
@@ -53,7 +53,7 @@ const (
 
 func newCache() *cache {
 	return &cache{
-		contacts:    make(map[string]*Contact),
+		contacts: make(map[string]*Contact),
 	}
 }
 
