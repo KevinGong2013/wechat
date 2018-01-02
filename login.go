@@ -292,7 +292,7 @@ func (wechat *WeChat) init() error {
 	}
 
 	var resp initResp
-	err = wechat.ExcuteRequest(req, &resp)
+	err = wechat.ExecuteRequest(req, &resp)
 	if err != nil {
 		return err
 	}
@@ -330,10 +330,10 @@ func (wechat *WeChat) keepAlive() {
 		}
 		logger.Info(`sync contact successfully`)
 
-        wechat.IsLogin = true
+		wechat.IsLogin = true
 		wechat.loginState <- 1
 		err = wechat.beginSync()
-        wechat.IsLogin = false
+		wechat.IsLogin = false
 		wechat.loginState <- -1
 
 		logger.Errorf(`sync error: %v`, err)

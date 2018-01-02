@@ -18,6 +18,17 @@ const (
 	Modify = 1
 )
 
+const (
+	// 男
+	Male = iota
+	// 女
+	Female
+	// 未知
+	Unknow
+	// 任何
+	Any
+)
+
 //noinspection ALL
 type updateGroupRequest struct {
 	BaseRequest
@@ -279,26 +290,31 @@ func (wechat *WeChat) ForceUpdateGroup(groupUserName string) {
 }
 
 // ContactByUserName ...
-func (wechat *WeChat) ContactByUserName(un string) (*Contact) {
+func (wechat *WeChat) ContactByUserName(un string) *Contact {
 	wechat.cache.Lock()
 	defer wechat.cache.Unlock()
 	return wechat.cache.contacts[un]
 }
 
-type Sex float64
-
-var MALE = Sex(0)
-var FEMALE = Sex(1)
-
 // ContactsByNickName search contact with nick name
-func (wechat *WeChat) SearchContact(nickName string, sex Sex, city string) ([]*Contact, error) {
+func (wechat *WeChat) SearchContact(nickName string, city string, sex int, contactType int) ([]*Contact, error) {
 	wechat.cache.Lock()
 	wechat.cache.Unlock()
 
 	var cs []*Contact
 	for _, c := range wechat.cache.contacts {
-		if c.NickName == nickName && c.Sex == float64(sex) && c.City == city {
-			cs = append(cs, c)
+		if c.NickName == nickName {
+			if len(city) > 0 && c.City != city {
+				continue
+			}
+			if contactType != Any && c.Type != contactType {
+				continue
+			}
+			if sex == Any {
+				cs = append(cs, c)
+			} else if (sex == Male && c.Sex == 0) || (sex == Female && c.Sex == 1) || (sex == Unknow && c.Sex == 3) {
+				cs = append(cs, c)
+			}
 		}
 	}
 	if len(cs) > 0 {

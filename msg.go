@@ -182,10 +182,10 @@ func (wechat *WeChat) UploadMedia(buf []byte, kind types.Type, info os.FileInfo,
 		fmt.Sprintf(`https://file2.%s/cgi-bin/mmwebwx-bin/webwxuploadmedia?f=json`, host),
 	}
 
-	for _, url := range urls {
+	for _, urlPath := range urls {
 
 		var req *http.Request
-		req, err = http.NewRequest(`POST`, url, body)
+		req, err = http.NewRequest(`POST`, urlPath, body)
 		if err != nil {
 			return ``, err
 		}
@@ -194,7 +194,7 @@ func (wechat *WeChat) UploadMedia(buf []byte, kind types.Type, info os.FileInfo,
 
 		resp := new(uploadMediaResponse)
 
-		err = wechat.ExcuteRequest(req, resp)
+		err = wechat.ExecuteRequest(req, resp)
 		if err != nil {
 			return ``, err
 		}
@@ -299,7 +299,7 @@ func baseMsg(to string) map[string]interface{} {
 // CookieDataTicket ...
 func (wechat *WeChat) CookieDataTicket() string {
 
-	url, err := url.Parse(wechat.BaseURL)
+	urlPath, err := url.Parse(wechat.BaseURL)
 
 	if err != nil {
 		return ``
@@ -307,7 +307,7 @@ func (wechat *WeChat) CookieDataTicket() string {
 
 	ticket := ``
 
-	cookies := wechat.Client.Jar.Cookies(url)
+	cookies := wechat.Client.Jar.Cookies(urlPath)
 
 	for _, cookie := range cookies {
 		if cookie.Name == `webwx_data_ticket` {

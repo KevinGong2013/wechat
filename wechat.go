@@ -72,7 +72,6 @@ type Configure struct {
 	Processor         UUIDProcessor
 	Debug             bool
 	CachePath         string
-	FuzzyDiff         bool
 	UniqueGroupMember bool
 	version           string
 }
@@ -82,9 +81,8 @@ func DefaultConfigure() *Configure {
 	return &Configure{
 		Processor:         new(defaultUUIDProcessor),
 		Debug:             true,
-		FuzzyDiff:         true,
 		UniqueGroupMember: true,
-		CachePath:         `.ggbot/debug`,
+		CachePath:         `.wechat/debug`,
 		version:           `1.0.1-rc1`,
 	}
 }
@@ -122,7 +120,7 @@ type WeChat struct {
 	loginState chan int // -1 登录失败 1登录成功
 }
 
-// NewWeChat is desined for Create a new Wechat instance.
+// NewWeChat is designed for Create a new Wechat instance.
 func newWeChat(conf *Configure) (*WeChat, error) {
 
 	if _, err := os.Stat(conf.CachePath); err != nil {
@@ -222,8 +220,8 @@ func AwakenNewBot(conf *Configure) (*WeChat, error) {
 	return wechat, nil
 }
 
-// ExcuteRequest is desined for perform http request
-func (wechat *WeChat) ExcuteRequest(req *http.Request, call Caller) error {
+// ExecuteRequest is designed for perform http request
+func (wechat *WeChat) ExecuteRequest(req *http.Request, call Caller) error {
 
 	filename := wechat.conf.httpDebugPath(req.URL)
 
@@ -282,7 +280,7 @@ func (wechat *WeChat) Execute(path string, body io.Reader, call Caller) error {
 	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
 	req.Header.Set(`User-Agent`, `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_2) AppleWebKit/602.3.12 (KHTML, like Gecko) Version/10.0.2 Safari/602.3.12`)
 
-	return wechat.ExcuteRequest(req, call)
+	return wechat.ExecuteRequest(req, call)
 }
 
 // PassTicketKV return a string like `pass_ticket=1234s`
