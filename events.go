@@ -269,14 +269,14 @@ func (es *evtStream) emitContactChangeEvent(ggid string, ct int) {
 		ChagngeType: ct,
 		GGID:        ggid,
 	}
-	path := `/del`
+	route := `/del`
 	if ct != Delete {
-		path = `/mod`
+		route = `/mod`
 	}
 	event := Event{
 		Type: `ContactChange`,
 		From: `Server`,
-		Path: `/contact` + path,
+		Path: `/contact` + route,
 		To:   `End`,
 		Time: time.Now().Unix(),
 		Data: data,
@@ -307,24 +307,24 @@ func (wechat *WeChat) emitNewMessageEvent(m map[string]interface{}) {
 
 	isMediaMsg := false
 	mediaURL := ``
-	path := ``
+	route := ``
 
 	switch msgType {
 	case 3:
-		path = `webwxgetmsgimg`
+		route = `webwxgetmsgimg`
 	case 47:
 		pid, _ := m[`HasProductId`].(float64)
 		if pid == 0 {
-			path = `webwxgetmsgimg`
+			route = `webwxgetmsgimg`
 		}
 	case 34:
-		path = `webwxgetvoice`
+		route = `webwxgetvoice`
 	case 43:
-		path = `webwxgetvideo`
+		route = `webwxgetvideo`
 	}
-	if len(path) > 0 {
+	if len(route) > 0 {
 		isMediaMsg = true
-		mediaURL = fmt.Sprintf(`%v/%s?msgid=%v&%v`, wechat.BaseURL, path, mid, wechat.SkeyKV())
+		mediaURL = fmt.Sprintf(`%v/%s?msgid=%v&%v`, wechat.BaseURL, route, mid, wechat.SkeyKV())
 	}
 	isAtMe := false
 	if isGroupMsg && !isSendedByMySelf {

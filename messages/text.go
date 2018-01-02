@@ -11,7 +11,7 @@ func (msg *TextMsg) Path() string {
 	return `webwxsendmsg`
 }
 
-// To destation
+// To destination
 func (msg *TextMsg) To() string {
 	return msg.to
 }

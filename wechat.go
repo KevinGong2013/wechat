@@ -268,8 +268,8 @@ func (wechat *WeChat) ExcuteRequest(req *http.Request, call Caller) error {
 	return nil
 }
 
-// Excute a http request by default http client.
-func (wechat *WeChat) Excute(path string, body io.Reader, call Caller) error {
+// Execute a http request by default http client.
+func (wechat *WeChat) Execute(path string, body io.Reader, call Caller) error {
 	method := "GET"
 	if body != nil {
 		method = "POST"
@@ -285,12 +285,12 @@ func (wechat *WeChat) Excute(path string, body io.Reader, call Caller) error {
 	return wechat.ExcuteRequest(req, call)
 }
 
-// PassTicketKV return a string like `pass_ticket=sdfewsvdwd=`
+// PassTicketKV return a string like `pass_ticket=1234s`
 func (wechat *WeChat) PassTicketKV() string {
 	return fmt.Sprintf(`pass_ticket=%s`, wechat.BaseRequest.PassTicket)
 }
 
-// SkeyKV return a string like `skey=ewfwoefjwofjskfwes`
+// SkeyKV return a string like `skey=1234s`
 func (wechat *WeChat) SkeyKV() string {
 	return fmt.Sprintf(`skey=%s`, wechat.BaseRequest.Skey)
 }

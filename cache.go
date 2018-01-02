@@ -9,7 +9,7 @@ import (
 	"io/ioutil"
 	"sync"
 
-	uuid "github.com/satori/go.uuid"
+	"github.com/satori/go.uuid"
 )
 
 type cache contactCache
@@ -326,21 +326,21 @@ func (c *cache) contactByGGID(ggid string) (*Contact, error) {
 	if contact, found := c.ggmap[ggid]; found {
 		return contact, nil
 	}
-	return nil, errors.New(`Not Found`)
+	return nil, errors.New(`not Found`)
 }
 
 func (c *cache) ggidsByNickName(nn string) ([]string, error) {
 	if ggids, found := c.nickGG[nn]; found {
 		return ggids, nil
 	}
-	return nil, errors.New(`Not Found`)
+	return nil, errors.New(`not Found`)
 }
 
 func (c *cache) contactByUserName(un string) (*Contact, error) {
 	if ggid, found := c.userGG[un]; found {
 		return c.contactByGGID(ggid)
 	}
-	return nil, errors.New(`Not Found`)
+	return nil, errors.New(`not Found`)
 }
 
 func (c *cache) writeToFile() error {

@@ -17,7 +17,7 @@ func (msg *FileMsg) Path() string {
 	return msg.path
 }
 
-// To destation
+// To destination
 func (msg *FileMsg) To() string {
 	return msg.to
 }

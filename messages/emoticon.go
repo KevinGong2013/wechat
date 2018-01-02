@@ -1,6 +1,6 @@
 package messages
 
-// EmoticonMsg is wechat emoji msg
+// EmoticonMsg is wechat emoticon msg
 type EmoticonMsg struct {
 	to      string
 	mediaID string
@@ -11,7 +11,7 @@ func (msg *EmoticonMsg) Path() string {
 	return `webwxsendemoticon?fun=sys`
 }
 
-// To destation
+// To destination
 func (msg *EmoticonMsg) To() string {
 	return msg.to
 }

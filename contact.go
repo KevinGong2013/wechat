@@ -53,7 +53,7 @@ func (wechat *WeChat) getContacts(seq float64) ([]map[string]interface{}, float6
 	url := fmt.Sprintf(`%s/webwxgetcontact?%s&%s&r=%s&seq=%v`, wechat.BaseURL, wechat.PassTicketKV(), wechat.SkeyKV(), now(), seq)
 	resp := new(getContactResponse)
 
-	err := wechat.Excute(url, nil, resp)
+	err := wechat.Execute(url, nil, resp)
 
 	if err != nil {
 		return nil, 0, err
@@ -175,7 +175,7 @@ func (wechat *WeChat) fetchGroups(usernames []string) ([]map[string]interface{},
 	url := fmt.Sprintf(`%s/webwxbatchgetcontact?type=ex&r=%v`, wechat.BaseURL, time.Now().Unix()*1000)
 	resp := new(batchGetContactResponse)
 
-	wechat.Excute(url, bytes.NewReader(data), resp)
+	wechat.Execute(url, bytes.NewReader(data), resp)
 
 	if resp.IsSuccess() {
 		return resp.ContactList, nil
@@ -223,7 +223,7 @@ func (wechat *WeChat) fetchMembers(list []map[string]string) []map[string]interf
 	url := fmt.Sprintf(`%s/webwxbatchgetcontact?type=ex&r=%v`, wechat.BaseURL, time.Now().Unix()*1000)
 	resp := new(batchGetContactResponse)
 
-	wechat.Excute(url, bytes.NewReader(data), resp)
+	wechat.Execute(url, bytes.NewReader(data), resp)
 
 	if !resp.IsSuccess() {
 		err := fmt.Errorf(`list: %s`, list)
@@ -361,7 +361,7 @@ func (wechat *WeChat) modifyRemarkName(un string) (string, error) {
 	url := fmt.Sprintf(`%s/webwxoplog?lang=zh_CN&%v`, wechat.BaseURL, wechat.PassTicketKV())
 	resp := new(Response)
 
-	wechat.Excute(url, bytes.NewReader(data), resp)
+	wechat.Execute(url, bytes.NewReader(data), resp)
 
 	if !resp.IsSuccess() {
 		logger.Error(resp.Error())

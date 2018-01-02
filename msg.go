@@ -82,7 +82,7 @@ func (wechat *WeChat) SendMsg(message Msg) error {
 		apiURL += `?` + wechat.PassTicketKV()
 	}
 
-	err = wechat.Excute(apiURL, buffer, resp)
+	err = wechat.Execute(apiURL, buffer, resp)
 
 	if err == nil {
 		logger.Debugf(`sended [%s] MsgID=[%s]`, resp.LocalID, resp.MsgID)

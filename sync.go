@@ -232,7 +232,7 @@ func (wechat *WeChat) sync() (*syncMessageResponse, error) {
 	resp := new(syncMessageResponse)
 	apiURL := fmt.Sprintf(`%s/webwxsync?sid=%s&lang=en_US&=%s`, wechat.BaseURL, wechat.BaseRequest.Wxsid, wechat.SkeyKV())
 
-	err = wechat.Excute(apiURL, bytes.NewReader(data), resp)
+	err = wechat.Execute(apiURL, bytes.NewReader(data), resp)
 
 	if err != nil {
 		return nil, err
