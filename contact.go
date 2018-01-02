@@ -18,12 +18,14 @@ const (
 	Modify = 1
 )
 
+//noinspection ALL
 type updateGroupRequest struct {
 	BaseRequest
 	Count int
 	List  []string
 }
 
+//noinspection ALL
 type updateGroupMemberRequest struct {
 	BaseRequest
 }
@@ -50,10 +52,10 @@ func (contact *Contact) To() string {
 
 func (wechat *WeChat) getContacts(seq float64) ([]map[string]interface{}, float64, error) {
 
-	url := fmt.Sprintf(`%s/webwxgetcontact?%s&%s&r=%s&seq=%v`, wechat.BaseURL, wechat.PassTicketKV(), wechat.SkeyKV(), now(), seq)
+	urlPath := fmt.Sprintf(`%s/webwxgetcontact?%s&%s&r=%s&seq=%v`, wechat.BaseURL, wechat.PassTicketKV(), wechat.SkeyKV(), now(), seq)
 	resp := new(getContactResponse)
 
-	err := wechat.Execute(url, nil, resp)
+	err := wechat.Execute(urlPath, nil, resp)
 
 	if err != nil {
 		return nil, 0, err
@@ -142,9 +144,9 @@ func (wechat *WeChat) GetContactHeadImg(c *Contact) ([]byte, error) {
 
 	host := urlOBJ.Host
 
-	url := fmt.Sprintf(`https://%s%s`, host, c.HeadImgURL)
+	urlPath := fmt.Sprintf(`https://%s%s`, host, c.HeadImgURL)
 
-	resp, err := wechat.Client.Get(url)
+	resp, err := wechat.Client.Get(urlPath)
 	if err != nil {
 		return nil, err
 	}
@@ -172,10 +174,10 @@ func (wechat *WeChat) fetchGroups(usernames []string) ([]map[string]interface{},
 		return nil, err
 	}
 
-	url := fmt.Sprintf(`%s/webwxbatchgetcontact?type=ex&r=%v`, wechat.BaseURL, time.Now().Unix()*1000)
+	urlPath := fmt.Sprintf(`%s/webwxbatchgetcontact?type=ex&r=%v`, wechat.BaseURL, time.Now().Unix()*1000)
 	resp := new(batchGetContactResponse)
 
-	wechat.Execute(url, bytes.NewReader(data), resp)
+	wechat.Execute(urlPath, bytes.NewReader(data), resp)
 
 	if resp.IsSuccess() {
 		return resp.ContactList, nil
@@ -211,7 +213,7 @@ func (wechat *WeChat) fetchGroupsMembers(groups []map[string]interface{}) ([]map
 func (wechat *WeChat) fetchMembers(list []map[string]string) []map[string]interface{} {
 
 	if len(list) > maxCountOnceLoadGroupMember {
-		return append(wechat.fetchMembers(list[:maxCountOnceLoadGroupMember]), wechat.fetchMembers(list[maxCountOnceLoadGroupMember:len(list)])...)
+		return append(wechat.fetchMembers(list[:maxCountOnceLoadGroupMember]), wechat.fetchMembers(list[maxCountOnceLoadGroupMember:])...)
 	}
 
 	data, _ := json.Marshal(map[string]interface{}{
@@ -220,10 +222,10 @@ func (wechat *WeChat) fetchMembers(list []map[string]string) []map[string]interf
 		`List`:        list,
 	})
 
-	url := fmt.Sprintf(`%s/webwxbatchgetcontact?type=ex&r=%v`, wechat.BaseURL, time.Now().Unix()*1000)
+	urlPath := fmt.Sprintf(`%s/webwxbatchgetcontact?type=ex&r=%v`, wechat.BaseURL, time.Now().Unix()*1000)
 	resp := new(batchGetContactResponse)
 
-	wechat.Execute(url, bytes.NewReader(data), resp)
+	wechat.Execute(urlPath, bytes.NewReader(data), resp)
 
 	if !resp.IsSuccess() {
 		err := fmt.Errorf(`list: %s`, list)
@@ -233,18 +235,18 @@ func (wechat *WeChat) fetchMembers(list []map[string]string) []map[string]interf
 	return resp.ContactList
 }
 
-// UpateGroupIfNeeded ...
-func (wechat *WeChat) UpateGroupIfNeeded(groupID string) {
+// UpdateGroupIfNeeded ...
+func (wechat *WeChat) UpdateGroupIfNeeded(groupID string) {
 
 	if _, err := wechat.cache.contactByUserName(groupID); err != nil {
 		wechat.ForceUpdateGroup(groupID)
 	}
 }
 
-// ForceUpdateGroup upate group infomation
+// ForceUpdateGroup update group information
 func (wechat *WeChat) ForceUpdateGroup(groupUserName string) {
 
-	logger.Debugf(`will fource update group username: %s`, groupUserName)
+	logger.Debugf(`will force updating group username: %s`, groupUserName)
 
 	groups, err := wechat.fetchGroups([]string{groupUserName})
 	if err != nil || len(groups) != 1 {
@@ -266,7 +268,7 @@ func (wechat *WeChat) ForceUpdateGroup(groupUserName string) {
 	}
 
 	for _, v := range memberList {
-		if _, found := wechat.cache.userGG[v[`UserName`].(string)]; found {
+		if _, found := wechat.cache.contacts[v[`UserName`].(string)]; found {
 			v[`Type`] = FriendAndMember
 		} else {
 			v[`Type`] = Group
@@ -277,42 +279,25 @@ func (wechat *WeChat) ForceUpdateGroup(groupUserName string) {
 }
 
 // ContactByUserName ...
-func (wechat *WeChat) ContactByUserName(un string) (*Contact, error) {
-
-	ggid, found := wechat.cache.userGG[un]
-	if !found {
-		return nil, errors.New(`not found`)
-	}
-
-	return wechat.cache.contactByGGID(ggid)
+func (wechat *WeChat) ContactByUserName(un string) (*Contact) {
+	wechat.cache.Lock()
+	defer wechat.cache.Unlock()
+	return wechat.cache.contacts[un]
 }
 
-// UserNameByNickName ..
-func (wechat *WeChat) UserNameByNickName(nn string) ([]string, error) {
+type Sex float64
 
-	cs, err := wechat.ContactsByNickName(nn)
-	if err != nil {
-		return nil, err
-	}
-
-	var uns []string
-	for _, c := range cs {
-		uns = append(uns, c.UserName)
-	}
-
-	return uns, nil
-}
+var MALE = Sex(0)
+var FEMALE = Sex(1)
 
 // ContactsByNickName search contact with nick name
-func (wechat *WeChat) ContactsByNickName(nn string) ([]*Contact, error) {
-	ggids, found := wechat.cache.nickGG[nn]
-	if !found {
-		return nil, errors.New(`not found`)
-	}
+func (wechat *WeChat) SearchContact(nickName string, sex Sex, city string) ([]*Contact, error) {
+	wechat.cache.Lock()
+	wechat.cache.Unlock()
+
 	var cs []*Contact
-	for _, ggid := range ggids {
-		c, err := wechat.cache.contactByGGID(ggid)
-		if err == nil {
+	for _, c := range wechat.cache.contacts {
+		if c.NickName == nickName && c.Sex == float64(sex) && c.City == city {
 			cs = append(cs, c)
 		}
 	}
@@ -322,21 +307,15 @@ func (wechat *WeChat) ContactsByNickName(nn string) ([]*Contact, error) {
 	return nil, errors.New(`not found`)
 }
 
-// ContactByGGID ...
-func (wechat *WeChat) ContactByGGID(id string) (*Contact, error) {
-	if c, found := wechat.cache.ggmap[id]; found {
-		return c, nil
-	}
-	return nil, errors.New(`not found`)
-}
-
 // AllContacts ...
 func (wechat *WeChat) AllContacts() []*Contact {
-	var vs []*Contact
-	for _, c := range wechat.cache.ggmap {
-		vs = append(vs, c)
+	wechat.cache.Lock()
+	wechat.cache.Unlock()
+	var values []*Contact
+	for _, value := range wechat.cache.contacts {
+		values = append(values, value)
 	}
-	return vs
+	return values
 }
 
 // MembersOfGroup ..返回群中所有的成员
@@ -358,10 +337,10 @@ func (wechat *WeChat) modifyRemarkName(un string) (string, error) {
 		`NickName`:    `Test`,
 	})
 
-	url := fmt.Sprintf(`%s/webwxoplog?lang=zh_CN&%v`, wechat.BaseURL, wechat.PassTicketKV())
+	urlPath := fmt.Sprintf(`%s/webwxoplog?lang=zh_CN&%v`, wechat.BaseURL, wechat.PassTicketKV())
 	resp := new(Response)
 
-	wechat.Execute(url, bytes.NewReader(data), resp)
+	wechat.Execute(urlPath, bytes.NewReader(data), resp)
 
 	if !resp.IsSuccess() {
 		logger.Error(resp.Error())

@@ -21,8 +21,8 @@ type Event struct {
 
 // EventContactData 通讯录中删人 或者有人修改资料的时候
 type EventContactData struct {
-	ChagngeType int
-	GGID        string
+	ChangeType int
+	Contact    Contact
 }
 
 // EventMsgData 新消息
@@ -35,11 +35,8 @@ type EventMsgData struct {
 	MediaURL         string
 	Content          string
 	FromUserName     string
-	FromGGID         string
 	SenderUserName   string
-	SenderGGID       string
 	ToUserName       string
-	ToGGID           string
 	OriginalMsg      map[string]interface{}
 }
 
@@ -49,7 +46,7 @@ type EventTimerData struct {
 	Count    uint64
 }
 
-// EventTimingtData ...
+// EventTimingData ...
 type EventTimingtData struct {
 	Count uint64
 }
@@ -264,10 +261,10 @@ func (wechat *WeChat) AddTiming(hm string) {
 	wechat.evtStream.merge(`timing`, newTimingCh(hm))
 }
 
-func (es *evtStream) emitContactChangeEvent(ggid string, ct int) {
+func (es *evtStream) emitContactChangeEvent(c Contact, ct int) {
 	data := EventContactData{
-		ChagngeType: ct,
-		GGID:        ggid,
+		ChangeType: ct,
+		Contact:   c,
 	}
 	route := `/del`
 	if ct != Delete {
@@ -300,7 +297,7 @@ func (wechat *WeChat) emitNewMessageEvent(m map[string]interface{}) {
 	isGroupMsg := false
 	if len(groupUserName) > 0 {
 		isGroupMsg = true
-		wechat.UpateGroupIfNeeded(groupUserName)
+		wechat.UpdateGroupIfNeeded(groupUserName)
 	}
 	msgType := m[`MsgType`].(float64)
 	mid := m[`MsgId`].(string)
@@ -341,8 +338,8 @@ func (wechat *WeChat) emitNewMessageEvent(m map[string]interface{}) {
 			return
 		}
 
-		contact, err := wechat.ContactByUserName(infos[0])
-		if err != nil {
+		contact := wechat.ContactByUserName(infos[0])
+		if contact == nil {
 			wechat.ForceUpdateGroup(groupUserName)
 			logger.Errorf(`can't find contact info, so ignore this message %s`, m)
 			return
@@ -361,11 +358,8 @@ func (wechat *WeChat) emitNewMessageEvent(m map[string]interface{}) {
 		MediaURL:         mediaURL,
 		Content:          content,
 		FromUserName:     fromUserName,
-		FromGGID:         wechat.cache.userGG[fromUserName], // TODO 不应该直接从字典里取
 		SenderUserName:   senderUserName,
-		SenderGGID:       wechat.cache.userGG[senderUserName],
 		ToUserName:       toUserName,
-		ToGGID:           wechat.cache.userGG[toUserName],
 		OriginalMsg:      m,
 	}
 	evtPath := `/solo`
@@ -389,15 +383,16 @@ func (wechat *WeChat) handleServerEvent(resp *syncMessageResponse) {
 
 	if resp.DelContactCount > 0 {
 		for _, v := range resp.DelContactList {
-			ggid := wechat.cache.userGG[v[`UserName`].(string)]
-			go es.emitContactChangeEvent(ggid, Delete)
+			go es.emitContactChangeEvent(Contact{UserName: v[`UserName`].(string)}, Delete) // 已经删除的联系人这里构造一个
 		}
 	}
 
 	if resp.ModContactCount > 0 {
 		for _, v := range resp.ModContactList {
-			ggid := wechat.cache.userGG[v[`UserName`].(string)]
-			go es.emitContactChangeEvent(ggid, Modify)
+			contact := wechat.ContactByUserName(v[`UserName`].(string))
+			if contact != nil {
+				go es.emitContactChangeEvent(*contact, Modify)
+			}
 		}
 	}
 

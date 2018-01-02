@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Kevingong2013/wechat"
+	"github.com/KevinGong2013/wechat"
 )
 
 func main() {
@@ -26,7 +26,7 @@ func main() {
 
 	bot.Handle(`/contact`, func(evt wechat.Event) {
 		data := evt.Data.(wechat.EventContactData)
-		fmt.Println(`/contact` + data.GGID)
+		fmt.Printf(`/contact/%v`, data.Contact.UserName)
 	})
 
 	bot.Handle(`/login`, func(arg2 wechat.Event) {

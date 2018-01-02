@@ -37,6 +37,10 @@ func (msg *FileMsg) Content() map[string]interface{} {
 	return content
 }
 
+func (msg *FileMsg) Description() string {
+	return fmt.Sprintf(`[FileMsg] %s`, msg.fname)
+}
+
 // NewFileMsg construct a new FileMsg's instance
 func NewFileMsg(mediaID, to, name, ext string) *FileMsg {
 	return &FileMsg{to, mediaID, `webwxsendappmsg?fun=async&f=json`, 6, name, ext}

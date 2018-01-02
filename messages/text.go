@@ -1,5 +1,7 @@
 package messages
 
+import "fmt"
+
 // TextMsg struct
 type TextMsg struct {
 	to      string
@@ -26,6 +28,10 @@ func (msg *TextMsg) Content() map[string]interface{} {
 	return content
 }
 
+func (msg *TextMsg) Description() string {
+	return fmt.Sprintf(`[TextMessage] %s`, msg.content)
+}
+
 // NewTextMsg construct a new TextMsg's instance
 func NewTextMsg(text, to string) *TextMsg {
 	return &TextMsg{to, text}
@@ -34,3 +40,4 @@ func NewTextMsg(text, to string) *TextMsg {
 func (msg *TextMsg) String() string {
 	return msg.content
 }
+

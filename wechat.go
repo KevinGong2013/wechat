@@ -153,7 +153,7 @@ func newWeChat(conf *Configure) (*WeChat, error) {
 		retryTimes:  time.Duration(0),
 		loginState:  make(chan int),
 		conf:        conf,
-		cache:       newCache(conf.contactCachePath()),
+		cache:       newCache(),
 	}
 
 	return wechat, nil

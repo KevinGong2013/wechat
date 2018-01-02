@@ -38,11 +38,13 @@ type Msg interface {
 	Path() string
 	To() string
 	Content() map[string]interface{}
+
+	Description() string
 }
 
 var mediaIndex = int64(0)
 
-// SendMsg is desined to send Message to group or contact
+// SendMsg send Message to group or contact
 func (wechat *WeChat) SendMsg(message Msg) error {
 
 	if wechat.BaseRequest == nil {
@@ -71,7 +73,7 @@ func (wechat *WeChat) SendMsg(message Msg) error {
 	}
 
 	logger.Debugf(`sending [%s]`, msg[`LocalID`])
-
+	logger.Debugf(`%s: %s`, msg[`LocalID`], message.Description())
 	resp := new(sendMsgResponse)
 
 	apiURL := fmt.Sprintf(`%s/%s`, wechat.BaseURL, message.Path())
