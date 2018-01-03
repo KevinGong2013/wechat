@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/emirpasic/gods/utils"
 	"sync"
 )
 
@@ -103,7 +102,7 @@ func (wechat *WeChat) syncContacts(cts []map[string]interface{}) {
 			des = "[公众号]"
 		}
 		buffer.WriteString(des)
-		buffer.WriteString(fmt.Sprintf(" %v", utils.ReplaceEmoji(c.NickName)))
+		buffer.WriteString(fmt.Sprintf(" %v", replaceEmoji(c.NickName)))
 		buffer.WriteString(fmt.Sprintf(" [Sex: %v", c.Sex))
 		buffer.WriteString(fmt.Sprintf(" City: %v]", c.City))
 		buffer.WriteString("\n")
