@@ -183,8 +183,8 @@ func newClient() (*http.Client, error) {
 	return client, nil
 }
 
-// AwakenNewBot is start point for wx bot.
-func AwakenNewBot(conf *Configure) (*WeChat, error) {
+// NewBot is start point for wx bot.
+func NewBot(conf *Configure) (*WeChat, error) {
 
 	if conf == nil {
 		conf = DefaultConfigure()

@@ -9,7 +9,7 @@ import (
 
 func main() {
 
-	bot, err := wechat.AwakenNewBot(nil)
+	bot, err := wechat.NewBot(nil)
 	if err != nil {
 		panic(err)
 	}
